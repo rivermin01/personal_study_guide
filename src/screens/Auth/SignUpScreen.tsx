@@ -12,7 +12,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { COLORS } from '../../constants/colors';
-import { signUp } from '../../utils/auth';
+import { signUp } from '../../utils/authService';
 import { useNavigation } from '@react-navigation/native';
 
 interface PasswordRules {

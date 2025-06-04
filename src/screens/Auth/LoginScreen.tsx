@@ -11,7 +11,7 @@ import {
   Platform,
 } from 'react-native';
 import { COLORS } from '../../constants/colors';
-import { signIn } from '../../utils/auth';
+import { signIn } from '../../utils/authService';
 import { useNavigation } from '@react-navigation/native';
 
 export default function LoginScreen() {
