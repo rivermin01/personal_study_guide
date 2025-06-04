@@ -1,37 +1,44 @@
 import React, { useEffect, useState } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { ActivityIndicator, View } from 'react-native';
 import TabNavigator from './navigations/TabNavigator';
 import AuthNavigator from './navigations/AuthNavigator';
-import { onAuthChange } from './utils/authService';
+import { onAuthChange, signOut } from './utils/authService';
+import { testFirebaseConnection } from './utils/firebaseTest';
+import { COLORS } from './constants/colors';
 import './config/firebase';
 
-const Stack = createNativeStackNavigator();
-
 export default function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
+    // 앱 시작 시 로그아웃
+    signOut().catch(error => {
+      console.error('로그아웃 실패:', error);
+    });
+
+    // Firebase 연결 테스트
+    testFirebaseConnection()
+      .then(result => {
+        console.log('Firebase 연결 테스트 결과:', result);
+      })
+      .catch(error => {
+        console.error('Firebase 연결 테스트 실패:', error);
+      });
+
     const unsubscribe = onAuthChange((user) => {
-      setIsAuthenticated(!!user);
+      setIsLoggedIn(!!user);
     });
 
     return () => unsubscribe();
   }, []);
 
-  if (isAuthenticated === null) {
-    return null; // 또는 로딩 화면
+  if (isLoggedIn === null) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.background }}>
+        <ActivityIndicator size="large" color={COLORS.point} />
+      </View>
+    );
   }
 
-  return (
-    <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {isAuthenticated ? (
-          <Stack.Screen name="MainTab" component={TabNavigator} />
-        ) : (
-          <Stack.Screen name="Auth" component={AuthNavigator} />
-        )}
-      </Stack.Navigator>
-    </NavigationContainer>
-  );
+  return !isLoggedIn ? <AuthNavigator /> : <TabNavigator />;
 } 

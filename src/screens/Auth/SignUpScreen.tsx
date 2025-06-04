@@ -101,7 +101,7 @@ export default function SignUpScreen() {
         [
           {
             text: '확인',
-            onPress: () => navigation.goBack(),
+            onPress: () => navigation.navigate('로그인' as never),
           },
         ],
         { cancelable: false }
