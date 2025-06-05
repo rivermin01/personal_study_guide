@@ -4,6 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import HomeStack from './HomeStackNavigator';
 import ProfileScreen from '../screens/Profile/ProfileScreen';
+import RecordsStack from './RecordsStackNavigator';
 import { COLORS } from '../constants/colors';
 
 const Tab = createBottomTabNavigator();
@@ -27,6 +28,15 @@ export default function TabNavigator() {
           options={{
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="home-outline" size={size} color={color} />
+            ),
+          }}
+        />
+        <Tab.Screen 
+          name="기록" 
+          component={RecordsStack}
+          options={{
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="list-outline" size={size} color={color} />
             ),
           }}
         />

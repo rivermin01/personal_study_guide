@@ -1,5 +1,5 @@
 export interface TestResult {
-  id?: string;
+  id: string;
   timestamp: number;
   answers: number[];
   personalityType: string;
