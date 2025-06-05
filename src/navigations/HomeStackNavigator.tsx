@@ -8,10 +8,14 @@ const Stack = createNativeStackNavigator();
 
 export default function HomeStack() {
   return (
-    <Stack.Navigator>
-        <Stack.Screen name="홈" component={HomeScreen} />
-        <Stack.Screen name="검사 시작" component={StartTestScreen} />
-        <Stack.Screen name="결과" component={ResultScreen} />
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
+      <Stack.Screen name="홈" component={HomeScreen} />
+      <Stack.Screen name="검사 시작" component={StartTestScreen} />
+      <Stack.Screen name="결과" component={ResultScreen} />
     </Stack.Navigator>
   );
 }

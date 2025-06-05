@@ -13,16 +13,19 @@ import {
 import { COLORS } from '../../constants/colors';
 import { signIn } from '../../utils/authService';
 import { useNavigation } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [keepLoggedIn, setKeepLoggedIn] = useState(false);
   const navigation = useNavigation<any>();
 
   const handleLogin = async () => {
-    setError(null); // 에러 메시지 초기화
+    setError(null);
 
     if (!email || !password) {
       setError('이메일과 비밀번호를 모두 입력해주세요.');
@@ -31,9 +34,15 @@ export default function LoginScreen() {
 
     try {
       setLoading(true);
-      await signIn(email, password);
-      // 로그인 성공 시 홈 화면으로 이동
-      navigation.replace('MainTab');
+      const user = await signIn(email, password);
+      
+      // 로그인 유지 설정 저장
+      if (keepLoggedIn) {
+        await AsyncStorage.setItem('keepLoggedIn', 'true');
+      } else {
+        await AsyncStorage.removeItem('keepLoggedIn');
+      }
+      
     } catch (error: any) {
       setError(error.message);
     } finally {
@@ -75,6 +84,17 @@ export default function LoginScreen() {
           secureTextEntry
           editable={!loading}
         />
+        <TouchableOpacity 
+          style={styles.keepLoginContainer}
+          onPress={() => setKeepLoggedIn(!keepLoggedIn)}
+        >
+          <Ionicons 
+            name={keepLoggedIn ? "checkbox" : "square-outline"} 
+            size={24} 
+            color={COLORS.point}
+          />
+          <Text style={styles.keepLoginText}>로그인 유지</Text>
+        </TouchableOpacity>
         {error && (
           <Text style={styles.errorText}>{error}</Text>
         )}
@@ -158,5 +178,15 @@ const styles = StyleSheet.create({
   signUpText: {
     color: COLORS.point,
     fontSize: 14,
+  },
+  keepLoginContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  keepLoginText: {
+    marginLeft: 8,
+    fontSize: 14,
+    color: COLORS.text,
   },
 }); 

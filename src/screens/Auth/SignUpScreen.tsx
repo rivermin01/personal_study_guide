@@ -14,6 +14,7 @@ import {
 import { COLORS } from '../../constants/colors';
 import { signUp } from '../../utils/authService';
 import { useNavigation } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 
 interface PasswordRules {
   length: boolean;
@@ -129,6 +130,12 @@ export default function SignUpScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
+      <TouchableOpacity 
+        style={styles.backButton}
+        onPress={() => navigation.goBack()}
+      >
+        <Ionicons name="arrow-back" size={24} color={COLORS.text} />
+      </TouchableOpacity>
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.title}>회원가입</Text>
         <TextInput
@@ -204,10 +211,17 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
   },
+  backButton: {
+    position: 'absolute',
+    top: Platform.OS === 'ios' ? 60 : 20,
+    left: 20,
+    zIndex: 1,
+    padding: 8,
+  },
   content: {
     flexGrow: 1,
     padding: 24,
-    justifyContent: 'center',
+    paddingTop: Platform.OS === 'ios' ? 100 : 60,
   },
   title: {
     fontSize: 24,
