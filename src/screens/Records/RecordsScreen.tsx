@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -10,17 +10,13 @@ import {
 import { COLORS } from '../../constants/colors';
 import { getAllTestResults } from '../../utils/firebase';
 import { TestResult } from '../../types/result';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
 export default function RecordsScreen() {
   const [records, setRecords] = useState<TestResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigation = useNavigation<any>();
-
-  useEffect(() => {
-    loadRecords();
-  }, []);
 
   const loadRecords = async () => {
     try {
@@ -37,6 +33,13 @@ export default function RecordsScreen() {
       setLoading(false);
     }
   };
+
+  // 탭이 포커스될 때마다 데이터를 다시 불러옵니다.
+  useFocusEffect(
+    React.useCallback(() => {
+      loadRecords();
+    }, [])
+  );
 
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp);

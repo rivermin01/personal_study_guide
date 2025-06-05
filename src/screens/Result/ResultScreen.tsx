@@ -1,9 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity, ActivityIndicator } from 'react-native';
+import React, { useEffect, useState, useRef } from 'react';
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity, ActivityIndicator, Share, Platform } from 'react-native';
 import { COLORS } from '../../constants/colors';
-import { RouteProp, useRoute } from '@react-navigation/native';
+import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
 import { saveTestResult } from '../../utils/firebase';
 import { TestResult } from '../../types/result';
+import ViewShot from 'react-native-view-shot';
+import * as FileSystem from 'expo-file-system';
+import { Ionicons } from '@expo/vector-icons';
 
 type RootStackParamList = {
   결과: { answers: number[] };
@@ -11,11 +14,47 @@ type RootStackParamList = {
 
 type ResultScreenRouteProp = RouteProp<RootStackParamList, '결과'>;
 
+const ResultContent = React.forwardRef<ViewShot, {
+  personalityType: string;
+  recommendation: string;
+  scores: {
+    extraversion: number;
+    openness: number;
+    conscientiousness: number;
+    agreeableness: number;
+    neuroticism: number;
+  };
+}>(({ personalityType, recommendation, scores }, ref) => {
+  const content = (
+    <View style={styles.resultContainer}>
+      <Text style={styles.title}>{personalityType}</Text>
+      <Text style={styles.recommend}>{recommendation}</Text>
+      <Text style={styles.title}>검사 결과 요약</Text>
+      <Text style={styles.result}>외향성: {scores.extraversion}</Text>
+      <Text style={styles.result}>개방성: {scores.openness}</Text>
+      <Text style={styles.result}>성실성: {scores.conscientiousness}</Text>
+      <Text style={styles.result}>친화성: {scores.agreeableness}</Text>
+      <Text style={styles.result}>정서 안정성: {scores.neuroticism}</Text>
+    </View>
+  );
+
+  if (Platform.OS === 'web') {
+    return content;
+  }
+
+  return (
+    <ViewShot ref={ref} options={{ format: "jpg", quality: 0.9 }}>
+      {content}
+    </ViewShot>
+  );
+});
+
 export default function ResultScreen() {
   const route = useRoute<ResultScreenRouteProp>();
+  const navigation = useNavigation<any>();
   const { answers } = route.params;
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const resultRef = useRef<ViewShot>(null);
 
   const average = (arr: number[]) =>
     Math.round((arr.reduce((sum, val) => sum + val, 0) / arr.length) * 10) / 10;
@@ -65,10 +104,10 @@ export default function ResultScreen() {
       recommendation: '체계적이고 반복적인 연습문제 풀이, 체크리스트를 통한 실전 위주 학습이 효과적입니다.',
     },
     {
-      label: '📈 균형 잡힌 현실가',
-      description: '안정적이고 현실적인 판단을 하는 유형입니다.',
-      vector: [4, 4, 4, 4, 4],
-      recommendation: '다양한 학습법을 시도하며 자신에게 맞는 방법을 찾아보세요. 균형 잡힌 시간 분배가 중요합니다.',
+      label: '📚 체계적인 학습가',
+      description: '논리적이고 체계적인 방식으로 지식을 습득하는 것을 선호합니다.',
+      vector: [3, 5, 6, 4, 3],
+      recommendation: '개념 정리부터 문제 풀이까지 단계별 학습법을 활용하세요. 마인드맵과 요약 노트 작성이 효과적입니다.',
     },
     {
       label: '🧩 다재다능 창의인',
@@ -145,7 +184,6 @@ export default function ResultScreen() {
         };
         
         await saveTestResult(result);
-        setSaved(true);
       } catch (error) {
         console.error('Failed to save result:', error);
       } finally {
@@ -156,23 +194,84 @@ export default function ResultScreen() {
     saveResult();
   }, []);
 
+  const handleShare = async () => {
+    try {
+      if (Platform.OS === 'web') {
+        // 웹에서는 텍스트로 공유
+        const textResult = `
+나의 학습 유형 검사 결과
+
+${personalityType}
+
+${recommendation}
+
+검사 결과 요약
+외향성: ${extraversion}
+개방성: ${openness}
+성실성: ${conscientiousness}
+친화성: ${agreeableness}
+정서 안정성: ${neuroticism}
+        `;
+
+        if (navigator.share) {
+          await navigator.share({
+            title: '나의 학습 유형 검사 결과',
+            text: textResult,
+          });
+        } else {
+          // 클립보드에 복사
+          await navigator.clipboard.writeText(textResult);
+          alert('결과가 클립보드에 복사되었습니다.');
+        }
+      } else {
+        // 모바일에서는 이미지로 공유
+        if (resultRef.current?.capture) {
+          const uri = await resultRef.current.capture();
+          await Share.share({
+            url: Platform.OS === 'ios' ? uri : `file://${uri}`,
+            message: '나의 학습 유형 검사 결과',
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+      alert('공유하기에 실패했습니다.');
+    }
+  };
+
+  const handleGoHome = () => {
+    navigation.navigate('홈');
+  };
+
   return (
     <View style={styles.container}>
       {saving ? (
         <ActivityIndicator size="large" color={COLORS.point} />
       ) : (
         <>
-          <Text style={styles.title}>{personalityType}</Text>
-          <Text style={styles.recommend}>{recommendation}</Text>
-          <Text style={styles.title}>검사 결과 요약</Text>
-          <Text style={styles.result}>외향성: {extraversion}</Text>
-          <Text style={styles.result}>개방성: {openness}</Text>
-          <Text style={styles.result}>성실성: {conscientiousness}</Text>
-          <Text style={styles.result}>친화성: {agreeableness}</Text>
-          <Text style={styles.result}>정서 안정성: {neuroticism}</Text>
-          {saved && (
-            <Text style={styles.savedText}>결과가 저장되었습니다.</Text>
-          )}
+          <ResultContent
+            ref={Platform.OS === 'web' ? null : resultRef}
+            personalityType={personalityType}
+            recommendation={recommendation}
+            scores={{
+              extraversion,
+              openness,
+              conscientiousness,
+              agreeableness,
+              neuroticism
+            }}
+          />
+          <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
+            <Ionicons name="share-outline" size={24} color="#fff" />
+            <Text style={styles.shareButtonText}>결과 공유하기</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.shareButton, styles.homeButton]} 
+            onPress={handleGoHome}
+          >
+            <Ionicons name="home-outline" size={24} color="#fff" />
+            <Text style={styles.shareButtonText}>홈으로 돌아가기</Text>
+          </TouchableOpacity>
         </>
       )}
     </View>
@@ -184,7 +283,20 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
     padding: 24,
-    justifyContent: 'center',
+  },
+  resultContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 24,
+    marginVertical: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   title: {
     fontSize: 22,
@@ -198,6 +310,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     textAlign: 'center',
     color: COLORS.text,
+    lineHeight: 24,
   },
   result: {
     fontSize: 18,
@@ -205,10 +318,22 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: COLORS.text,
   },
-  savedText: {
-    fontSize: 16,
-    color: COLORS.point,
-    textAlign: 'center',
+  shareButton: {
+    backgroundColor: COLORS.point,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+    borderRadius: 12,
     marginTop: 20,
+  },
+  homeButton: {
+    backgroundColor: '#6c757d',
+  },
+  shareButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 8,
   },
 });

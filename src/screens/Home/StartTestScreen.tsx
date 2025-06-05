@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { COLORS } from '../../constants/colors';
 import { useNavigation } from '@react-navigation/native';
 
@@ -20,6 +20,7 @@ export default function StartTestScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<(number | null)[]>(Array(questions.length).fill(null));
   const navigation = useNavigation<any>();
+  const progress = ((currentIndex + 1) / questions.length) * 100;
 
   const handleAnswer = (score: number) => {
     const newAnswers = [...answers];
@@ -41,53 +42,130 @@ export default function StartTestScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.questionNumber}>{currentIndex + 1} / {questions.length}</Text>
-      <Text style={styles.questionText}>{questions[currentIndex].text}</Text>
-
-      <View style={styles.scoreButtons}>
-        {[1, 2, 3, 4, 5, 6, 7].map(score => {
-          const isSelected = answers[currentIndex] === score;
-          return (
-            <TouchableOpacity
-              key={score}
-              style={[styles.scoreButton, isSelected && styles.selectedButton]}
-              onPress={() => handleAnswer(score)}
-            >
-              <Text style={styles.scoreText}>{score}</Text>
-            </TouchableOpacity>
-          );
-        })}
+      <View style={styles.progressContainer}>
+        <View style={styles.progressBarBackground}>
+          <View style={[styles.progressBar, { width: `${progress}%` }]} />
+        </View>
+        <Text style={styles.progressText}>{currentIndex + 1} / {questions.length}</Text>
       </View>
 
-      <TouchableOpacity style={styles.prevButton} onPress={handlePrevious}>
-        <Text style={styles.prevText}>← 이전 문항</Text>
-      </TouchableOpacity>
+      <View style={styles.questionContainer}>
+        <Text style={styles.questionText}>{questions[currentIndex].text}</Text>
+
+        <View style={styles.scoreButtons}>
+          {[1, 2, 3, 4, 5, 6, 7].map(score => {
+            const isSelected = answers[currentIndex] === score;
+            return (
+              <TouchableOpacity
+                key={score}
+                style={[styles.scoreButton, isSelected && styles.selectedButton]}
+                onPress={() => handleAnswer(score)}
+              >
+                <Text style={[styles.scoreText, isSelected && styles.selectedText]}>
+                  {score}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+
+        <View style={styles.labelContainer}>
+          <Text style={styles.labelText}>전혀 그렇지 않다</Text>
+          <Text style={styles.labelText}>매우 그렇다</Text>
+        </View>
+
+        {currentIndex > 0 && (
+          <TouchableOpacity style={styles.prevButton} onPress={handlePrevious}>
+            <Text style={styles.prevText}>← 이전 문항</Text>
+          </TouchableOpacity>
+        )}
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    backgroundColor: COLORS.background, // 2번 색상 
-    justifyContent: 'center', 
-    alignItems: 'center', 
-    padding: 24 
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.background,
   },
-  questionNumber: { fontSize: 16, marginBottom: 10 },
-  questionText: { fontSize: 20, fontWeight: '600', marginBottom: 24, textAlign: 'center' },
-  scoreButtons: { flexDirection: 'row', gap: 12, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 24 },
+  progressContainer: {
+    padding: 20,
+    paddingTop: 40,
+  },
+  progressBarBackground: {
+    height: 8,
+    backgroundColor: '#e9ecef',
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  progressBar: {
+    height: '100%',
+    backgroundColor: COLORS.point,
+    borderRadius: 4,
+  },
+  progressText: {
+    textAlign: 'center',
+    marginTop: 8,
+    fontSize: 16,
+    color: COLORS.text,
+  },
+  questionContainer: {
+    flex: 1,
+    padding: 24,
+    justifyContent: 'center',
+  },
+  questionText: {
+    fontSize: 22,
+    fontWeight: '600',
+    marginBottom: 40,
+    textAlign: 'center',
+    color: COLORS.text,
+    lineHeight: 32,
+  },
+  scoreButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    marginBottom: 16,
+  },
   scoreButton: {
-    backgroundColor: COLORS.point, // 1번 색상
-    paddingVertical: 12,
-    paddingHorizontal: 18,
-    borderRadius: 8,
-    margin: 4,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: COLORS.point,
   },
   selectedButton: {
-    backgroundColor: '#D188A8', // 선택 시 진한 핑크
+    backgroundColor: COLORS.point,
   },
-  scoreText: { color: '#fff', fontSize: 16 },
-  prevButton: { position: 'absolute', bottom: 40 },
-  prevText: { color: COLORS.text, fontSize: 16 },
+  scoreText: {
+    fontSize: 16,
+    color: COLORS.point,
+    fontWeight: '600',
+  },
+  selectedText: {
+    color: '#fff',
+  },
+  labelContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 10,
+  },
+  labelText: {
+    fontSize: 14,
+    color: '#666',
+  },
+  prevButton: {
+    position: 'absolute',
+    bottom: 40,
+    left: 24,
+  },
+  prevText: {
+    color: COLORS.text,
+    fontSize: 16,
+  },
 });

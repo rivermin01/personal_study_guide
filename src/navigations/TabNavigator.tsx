@@ -3,7 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import HomeStack from './HomeStackNavigator';
-import ProfileScreen from '../screens/Profile/ProfileScreen';
+import SettingsScreen from '../screens/Settings/SettingsScreen';
 import RecordsStack from './RecordsStackNavigator';
 import { COLORS } from '../constants/colors';
 
@@ -41,11 +41,11 @@ export default function TabNavigator() {
           }}
         />
         <Tab.Screen 
-          name="프로필" 
-          component={ProfileScreen}
+          name="설정" 
+          component={SettingsScreen}
           options={{
             tabBarIcon: ({ color, size }) => (
-              <Ionicons name="person-outline" size={size} color={color} />
+              <Ionicons name="settings-outline" size={size} color={color} />
             ),
           }}
         />

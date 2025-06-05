@@ -18,8 +18,8 @@ type RouteParams = {
 
 export default function RecordDetailScreen() {
   const navigation = useNavigation();
-  const route = useRoute();
-  const { result } = route.params as RouteParams;
+  const route = useRoute<any>();
+  const { result } = route.params;
 
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp);
@@ -36,6 +36,7 @@ export default function RecordDetailScreen() {
           <Ionicons name="arrow-back" size={24} color={COLORS.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>검사 결과</Text>
+        <View style={styles.placeholder} />
       </View>
       <ScrollView style={styles.content}>
         <Text style={styles.date}>{formatDate(result.timestamp)}</Text>
@@ -70,6 +71,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     padding: 16,
     paddingTop: Platform.OS === 'ios' ? 60 : 16,
     backgroundColor: '#fff',
@@ -78,12 +80,17 @@ const styles = StyleSheet.create({
   },
   backButton: {
     padding: 8,
+    width: 40,
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
     color: COLORS.text,
-    marginLeft: 16,
+    flex: 1,
+    textAlign: 'center',
+  },
+  placeholder: {
+    width: 40,
   },
   content: {
     flex: 1,
