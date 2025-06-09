@@ -2,10 +2,12 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import HomeStack from './HomeStackNavigator';
-import SettingsScreen from '../screens/Settings/SettingsScreen';
-import RecordsStack from './RecordsStackNavigator';
 import { COLORS } from '../constants/colors';
+
+import HomeStack from './HomeStackNavigator';
+import RecordsStack from './RecordsStackNavigator';
+import SettingsScreen from '../screens/Settings/SettingsScreen';
+import TimerScreen from '../screens/Timer/TimerScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -22,7 +24,7 @@ export default function TabNavigator() {
           headerShown: false,
         }}
       >
-        <Tab.Screen 
+        <Tab.Screen
           name="홈" 
           component={HomeStack}
           options={{
@@ -31,7 +33,16 @@ export default function TabNavigator() {
             ),
           }}
         />
-        <Tab.Screen 
+        <Tab.Screen
+          name="타이머"
+          component={TimerScreen}
+          options={{
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="timer-outline" size={size} color={color} />
+            ),
+          }}
+        />
+        <Tab.Screen
           name="기록" 
           component={RecordsStack}
           options={{
@@ -40,7 +51,7 @@ export default function TabNavigator() {
             ),
           }}
         />
-        <Tab.Screen 
+        <Tab.Screen
           name="설정" 
           component={SettingsScreen}
           options={{

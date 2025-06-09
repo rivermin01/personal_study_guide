@@ -30,11 +30,11 @@ const ResultContent = React.forwardRef<ViewShot, {
       <Text style={styles.title}>{personalityType}</Text>
       <Text style={styles.recommend}>{recommendation}</Text>
       <Text style={styles.title}>검사 결과 요약</Text>
-      <Text style={styles.result}>외향성: {scores.extraversion}</Text>
-      <Text style={styles.result}>개방성: {scores.openness}</Text>
-      <Text style={styles.result}>성실성: {scores.conscientiousness}</Text>
-      <Text style={styles.result}>친화성: {scores.agreeableness}</Text>
-      <Text style={styles.result}>정서 안정성: {scores.neuroticism}</Text>
+      <Text style={styles.result}>외향성: {scores.extraversion}/7</Text>
+      <Text style={styles.result}>개방성: {scores.openness}/7</Text>
+      <Text style={styles.result}>성실성: {scores.conscientiousness}/7</Text>
+      <Text style={styles.result}>친화성: {scores.agreeableness}/7</Text>
+      <Text style={styles.result}>정서 안정성: {scores.neuroticism}/7</Text>
     </View>
   );
 
@@ -206,11 +206,11 @@ ${personalityType}
 ${recommendation}
 
 검사 결과 요약
-외향성: ${extraversion}
-개방성: ${openness}
-성실성: ${conscientiousness}
-친화성: ${agreeableness}
-정서 안정성: ${neuroticism}
+외향성: ${extraversion}/7
+개방성: ${openness}/7
+성실성: ${conscientiousness}/7
+친화성: ${agreeableness}/7
+정서 안정성: ${neuroticism}/7
         `;
 
         if (navigator.share) {

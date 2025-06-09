@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
-import TabNavigator from './navigations/TabNavigator';
-import AuthNavigator from './navigations/AuthNavigator';
+import TabNavigator from './navigation/TabNavigator';
+import AuthNavigator from './navigation/AuthNavigator';
 import { onAuthChange, signOut } from './utils/authService';
 import { testFirebaseConnection } from './utils/firebaseTest';
 import { COLORS } from './constants/colors';

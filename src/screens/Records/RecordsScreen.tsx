@@ -1,96 +1,165 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  FlatList,
   TouchableOpacity,
+  FlatList,
   ActivityIndicator,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { COLORS } from '../../constants/colors';
-import { getAllTestResults } from '../../utils/firebase';
-import { TestResult } from '../../types/result';
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
+import { db, auth } from '../../config/firebase';
+import { TestRecord, TimerRecord, RecordType } from '../../types/records';
+import { formatDate } from '../../utils/date';
 
 export default function RecordsScreen() {
-  const [records, setRecords] = useState<TestResult[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const navigation = useNavigation<any>();
+  const [loading, setLoading] = useState(true);
+  const [testRecords, setTestRecords] = useState<TestRecord[]>([]);
+  const [timerRecords, setTimerRecords] = useState<TimerRecord[]>([]);
+  const [selectedType, setSelectedType] = useState<RecordType>('test');
+
+  useEffect(() => {
+    loadRecords();
+  }, [selectedType]);
 
   const loadRecords = async () => {
     try {
-      setLoading(true);
-      setError(null);
-      const results = await getAllTestResults();
-      // 날짜순 정렬 (최신순)
-      const sortedResults = results.sort((a, b) => b.timestamp - a.timestamp);
-      setRecords(sortedResults);
+      const userId = auth.currentUser?.uid;
+      if (!userId) return;
+
+      // 검사 기록 로드
+      const testQuery = query(
+        collection(db, 'testResults'),
+        where('userId', '==', userId),
+        orderBy('timestamp', 'desc')
+      );
+      const testSnapshot = await getDocs(testQuery);
+      const testData = testSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as TestRecord[];
+      setTestRecords(testData);
+
+      // 타이머 기록 로드
+      const timerQuery = query(
+        collection(db, 'studySessions'),
+        where('userId', '==', userId),
+        orderBy('startTime', 'desc')
+      );
+      const timerSnapshot = await getDocs(timerQuery);
+      const timerData = timerSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as TimerRecord[];
+      setTimerRecords(timerData);
+
+      setLoading(false);
     } catch (error) {
-      setError('기록을 불러오는데 실패했습니다.');
       console.error('Error loading records:', error);
-    } finally {
       setLoading(false);
     }
   };
 
-  // 탭이 포커스될 때마다 데이터를 다시 불러옵니다.
-  useFocusEffect(
-    React.useCallback(() => {
-      loadRecords();
-    }, [])
-  );
-
-  const formatDate = (timestamp: number) => {
-    const date = new Date(timestamp);
-    return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일 ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
-  };
-
-  const renderItem = ({ item }: { item: TestResult }) => (
+  const renderTestRecord = ({ item }: { item: TestRecord }) => (
     <TouchableOpacity
       style={styles.recordItem}
-      onPress={() => navigation.navigate('기록 상세', { result: item })}
+      // onPress={() => navigation.navigate('기록', { screen: 'RecordDetail', params: { result: item } })}
     >
-      <Text style={styles.dateText}>{formatDate(item.timestamp)}</Text>
-      <Text style={styles.typeText}>{item.personalityType.split(':')[0]}</Text>
+      <Text style={styles.recordTitle}>{item.personalityType}</Text>
+      <Text style={styles.recordDate}>{formatDate(item.timestamp)}</Text>
     </TouchableOpacity>
   );
 
+  const renderTimerRecord = ({ item }: { item: TimerRecord }) => {
+    const duration = Math.round(item.duration / 60); // 초 단위를 분 단위로 변환
+    return (
+      <TouchableOpacity
+        style={styles.recordItem}
+        // onPress={() => navigation.navigate('기록', { screen: 'TimerRecordDetail', params: { record: item } })}
+      >
+        <Text style={styles.recordTitle}>
+          {item.subject} ({duration}분)
+        </Text>
+        <Text style={styles.recordDate}>{formatDate(item.startTime)}</Text>
+        <View style={styles.recordStats}>
+          <Text style={styles.recordStat}>집중도: {item.focusScore}</Text>
+          <Text style={styles.recordStat}>
+            휴식 횟수: {item.breakSegments.length}회
+          </Text>
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
   if (loading) {
     return (
-      <View style={styles.centerContainer}>
+      <View style={styles.centered}>
         <ActivityIndicator size="large" color={COLORS.point} />
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View style={styles.centerContainer}>
-        <Text style={styles.errorText}>{error}</Text>
-        <TouchableOpacity style={styles.retryButton} onPress={loadRecords}>
-          <Text style={styles.retryText}>다시 시도</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
-
-  if (records.length === 0) {
-    return (
-      <View style={styles.centerContainer}>
-        <Text style={styles.emptyText}>아직 검사 기록이 없습니다.</Text>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      <FlatList
-        data={records}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContent}
-      />
+      <View style={styles.segmentContainer}>
+        <TouchableOpacity
+          style={[
+            styles.segmentButton,
+            selectedType === 'test' && styles.segmentButtonActive,
+          ]}
+          onPress={() => setSelectedType('test')}
+        >
+          <Text
+            style={[
+              styles.segmentButtonText,
+              selectedType === 'test' && styles.segmentButtonTextActive,
+            ]}
+          >
+            검사 기록
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.segmentButton,
+            selectedType === 'timer' && styles.segmentButtonActive,
+          ]}
+          onPress={() => setSelectedType('timer')}
+        >
+          <Text
+            style={[
+              styles.segmentButtonText,
+              selectedType === 'timer' && styles.segmentButtonTextActive,
+            ]}
+          >
+            타이머 기록
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {selectedType === 'test' ? (
+        <FlatList
+          data={testRecords}
+          renderItem={renderTestRecord}
+          keyExtractor={item => item.id}
+          contentContainerStyle={styles.listContainer}
+          ListEmptyComponent={
+            <Text style={styles.emptyText}>검사 기록이 없습니다.</Text>
+          }
+        />
+      ) : (
+        <FlatList
+          data={timerRecords}
+          renderItem={renderTimerRecord}
+          keyExtractor={item => item.id}
+          contentContainerStyle={styles.listContainer}
+          ListEmptyComponent={
+            <Text style={styles.emptyText}>타이머 기록이 없습니다.</Text>
+          }
+        />
+      )}
     </View>
   );
 }
@@ -100,14 +169,36 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
   },
-  centerContainer: {
+  centered: {
     flex: 1,
-    backgroundColor: COLORS.background,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 24,
   },
-  listContent: {
+  segmentContainer: {
+    flexDirection: 'row',
+    padding: 16,
+    gap: 8,
+  },
+  segmentButton: {
+    flex: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+  },
+  segmentButtonActive: {
+    backgroundColor: COLORS.point,
+  },
+  segmentButtonText: {
+    fontSize: 16,
+    color: '#666',
+  },
+  segmentButtonTextActive: {
+    color: '#fff',
+    fontWeight: '600',
+  },
+  listContainer: {
     padding: 16,
   },
   recordItem: {
@@ -115,42 +206,37 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
     marginBottom: 12,
-    elevation: 2,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
-  dateText: {
-    fontSize: 16,
+  recordTitle: {
+    fontSize: 18,
     fontWeight: '600',
     color: COLORS.text,
     marginBottom: 4,
   },
-  typeText: {
+  recordDate: {
     fontSize: 14,
     color: '#666',
   },
-  errorText: {
-    fontSize: 16,
-    color: '#ff6b6b',
-    marginBottom: 16,
-    textAlign: 'center',
+  recordStats: {
+    flexDirection: 'row',
+    marginTop: 8,
+    gap: 16,
+  },
+  recordStat: {
+    fontSize: 14,
+    color: COLORS.text,
   },
   emptyText: {
-    fontSize: 16,
-    color: '#666',
     textAlign: 'center',
-  },
-  retryButton: {
-    backgroundColor: COLORS.point,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-  },
-  retryText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
+    color: '#666',
+    marginTop: 24,
   },
 }); 
