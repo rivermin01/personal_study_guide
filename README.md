@@ -6,7 +6,7 @@
 ## 주요 기능
 
 ### 1. 학습 성향 검사
-- 과학적으로 검증된 성격 유형 검사 제공
+- 과학적으로 검증된 성격 유형 검사 제공 (Big Five 성격 유형 검사, OCEAN 모델 기반)
 - 5가지 주요 성향 분석 (외향성, 개방성, 성실성, 친화성, 정서 안정성)
 - 실시간 검사 진행률 표시
 
@@ -32,6 +32,123 @@
 - 자동 로그인 지원
 
 ## 기술 스택
+
 - **프론트엔드**: React Native, TypeScript, Expo
+  - **React Native**: iOS 및 Android에서 실행되는 크로스 플랫폼 모바일 애플리케이션 개발에 사용됩니다. 학습 성향 검사, 타이머, 학습 세션 관리, 기록 열람 등의 사용자 인터페이스(UI)를 구성합니다.
+  - **TypeScript**: JavaScript에 타입 안전성을 제공하여 코드의 안정성과 가독성을 높입니다. 특히 복잡한 데이터 구조와 비즈니스 로직을 명확하게 정의하는 데 활용됩니다.
+  - **Expo**: React Native 애플리케이션의 개발 및 빌드를 간소화하는 프레임워크입니다. 개발 환경 설정, 앱 빌드 및 배포 과정을 효율적으로 지원합니다.
+
 - **백엔드 (ML 서버)**: Python, Flask, Scikit-learn, NumPy
-- **데이터베이스**: Firebase (Authentication, Firestore) 
+  - **Python / Flask**: AI/ML 관련 기능을 담당하는 백엔드 서버를 구축하는 데 사용됩니다. 클라이언트로부터 학습 데이터를 받아 분석하고, 최적의 학습/휴식 시간 예측 및 맞춤형 피드백을 제공하는 API 엔드포인트를 처리합니다.
+  - **Scikit-learn**: 머신러닝 모델(예: 선형 회귀)을 구현하여 사용자의 과거 학습 데이터를 기반으로 최적의 학습 시간과 휴식 시간을 예측하는 데 활용됩니다.
+  - **NumPy**: Scikit-learn과 함께 머신러닝 모델의 데이터 전처리 및 수치 계산에 필요한 배열 연산을 효율적으로 수행합니다.
+
+- **데이터베이스**: Firebase (Authentication, Firestore)
+  - **Firebase Authentication**: 사용자 계정 생성, 로그인, 자동 로그인 및 세션 관리 등 사용자 인증을 담당합니다.
+  - **Firestore**: NoSQL 클라우드 데이터베이스로, 사용자의 학습 성향 검사 결과, 학습 세션 기록 등 모든 애플리케이션 데이터를 실시간으로 안전하게 저장하고 관리합니다.
+
+## 개발 기간
+2025.05.22 ~ 2025.06.10
+
+## 개발 환경
+- **OS**: macOS Sonoma 14.5
+- **Node.js**: v18.x.x (Expo 요구사항)
+- **Python**: 3.x.x (Flask, Scikit-learn, NumPy)
+- **Expo CLI**: 53.x.x
+- **npm**: 10.x.x
+
+## 프로젝트 아키텍처
+
+이 프로젝트는 사용자 중심의 학습 경험을 제공하기 위해 **모바일 앱(클라이언트)**, **Firebase(데이터베이스)**, 그리고 **ML 서버(백엔드)**의 세 가지 핵심 구성 요소로 이루어져 있습니다.
+
+```mermaid
+graph TD
+    A[사용자] --> B{모바일 앱 (React Native/Expo)}
+
+    subgraph 데이터베이스
+        C[Firebase]
+        C --> |인증| C1(Firebase Authentication)
+        C --> |데이터 저장/조회| C2(Firestore Database)
+    end
+
+    subgraph AI/ML 백엔드
+        D[ML 서버 (Python/Flask)]
+    end
+
+    B --> |사용자 인증 및 데이터 요청| C
+    B --> |학습 데이터 전송| D
+    D --> |분석 결과 및 피드백 전송| B
+    C --> |인증 상태/데이터 응답| B
+
+    style A fill:#f9f,stroke:#333,stroke-width:2px;
+    style B fill:#bbf,stroke:#333,stroke-width:2px;
+    style C fill:#ccf,stroke:#333,stroke-width:2px;
+    style D fill:#fbc,stroke:#333,stroke-width:2px;
+```
+
+### 아키텍처 구성 요소:
+
+-   **모바일 앱 (클라이언트)**: `React Native`와 `Expo`로 개발된 사용자 인터페이스입니다.
+    -   사용자의 학습 성향 검사 진행
+    -   스톱워치 기반의 학습 세션 시작, 일시정지, 종료 및 기록
+    -   과거 검사 결과 및 학습 세션 기록 열람
+    -   ML 서버의 분석 결과 및 피드백 표시
+    -   Firebase를 통한 사용자 인증 및 데이터 관리 요청
+
+-   **Firebase (데이터베이스)**: Google의 클라우드 기반 백엔드 서비스입니다.
+    -   **Authentication**: 사용자 계정 생성, 로그인, 자동 로그인 등 인증 처리
+    -   **Firestore**: 학습 성향 검사 결과, 학습 세션 기록 등 모든 애플리케이션 데이터 저장 및 실시간 동기화
+
+-   **ML 서버 (백엔드)**: `Python`과 `Flask` 기반의 AI/머신러닝 서버입니다.
+    -   모바일 앱에서 전송된 학습 데이터를 분석
+    -   사용자 학습 패턴 기반 최적의 학습/휴식 시간 예측
+    -   학습 결과에 대한 맞춤형 AI 피드백 생성 및 제공
+
+## 프로젝트 프로그램 설치방법
+
+### 1. 저장소 클론
+```bash
+git clone https://github.com/rivermin01/personal_study_guide.git
+cd personal_study_guide
+```
+
+### 2. 프론트엔드 (React Native/Expo) 의존성 설치
+```bash
+npm install
+# 또는 yarn install
+```
+
+### 3. 백엔드 (Python/Flask) 의존성 설치
+```bash
+pip install -r src/server/requirements.txt
+```
+
+### 4. Firebase 프로젝트 설정
+- 프로젝트 루트 디렉토리에 있는 `env.example` 파일을 복사하여 `.env` 파일을 생성합니다.
+- Firebase 콘솔에서 새 프로젝트를 생성합니다.
+- `프로젝트 설정 > 일반`에서 웹 앱을 추가하고 제공된 구성 정보(API 키, 도메인, 프로젝트 ID 등)를 `.env` 파일에 `FIREBASE_API_KEY=YOUR_API_KEY`와 같은 형식으로 입력합니다.
+- Firestore 데이터베이스를 생성하고, 필요한 경우 `firestore.rules` 파일을 기반으로 보안 규칙을 설정합니다.
+
+## 프로젝트 프로그램 사용법
+
+### 1. 백엔드 (ML 서버) 실행
+별도의 터미널에서 프로젝트 루트 디렉토리로 이동하여 다음 명령어를 실행합니다.
+```bash
+python src/server/app.py
+```
+서버가 `http://127.0.0.1:5001`에서 실행되는 것을 확인합니다.
+
+### 2. 프론트엔드 (React Native 웹 앱) 실행
+다른 터미널에서 프로젝트 루트 디렉토리로 이동하여 다음 명령어를 실행합니다.
+```bash
+npm start
+# 또는 expo start
+```
+브라우저에서 애플리케이션이 열립니다. (`http://localhost:8081`)
+
+### 3. 애플리케이션 사용
+- **회원가입/로그인**: 앱 실행 후 계정을 생성하거나 로그인합니다.
+- **학습 성향 검사**: '검사' 탭에서 성향 검사를 진행하고 결과를 확인합니다.
+- **학습 세션 관리**: '타이머' 탭에서 공부/휴식 타이머를 시작하고 종료하여 학습 세션을 기록합니다.
+- **기록 확인**: '기록' 탭에서 과거의 검사 결과 및 학습 세션 기록을 열람합니다.
+- **로그아웃**: 로그인된 상태에서 언제든지 로그아웃할 수 있습니다. 
