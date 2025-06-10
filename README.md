@@ -61,48 +61,41 @@
 
 이 프로젝트는 사용자 중심의 학습 경험을 제공하기 위해 **모바일 앱(클라이언트)**, **Firebase(데이터베이스)**, 그리고 **ML 서버(백엔드)**의 세 가지 핵심 구성 요소로 이루어져 있습니다.
 
-```mermaid
-graph TD
-    A[사용자] --> B{모바일 앱 (React Native/Expo)}
+**프로젝트 아키텍처 (트리 구조)**
 
-    subgraph 데이터베이스
-        C[Firebase]
-        C --> |인증| C1(Firebase Authentication)
-        C --> |데이터 저장/조회| C2(Firestore Database)
-    end
-
-    subgraph AI/ML 백엔드
-        D[ML 서버 (Python/Flask)]
-    end
-
-    B --> |사용자 인증 및 데이터 요청| C
-    B --> |학습 데이터 전송| D
-    D --> |분석 결과 및 피드백 전송| B
-    C --> |인증 상태/데이터 응답| B
-
-    style A fill:#f9f,stroke:#333,stroke-width:2px;
-    style B fill:#bbf,stroke:#333,stroke-width:2px;
-    style C fill:#ccf,stroke:#333,stroke-width:2px;
-    style D fill:#fbc,stroke:#333,stroke-width:2px;
-```
-
-### 아키텍처 구성 요소:
-
--   **모바일 앱 (클라이언트)**: `React Native`와 `Expo`로 개발된 사용자 인터페이스입니다.
-    -   사용자의 학습 성향 검사 진행
-    -   스톱워치 기반의 학습 세션 시작, 일시정지, 종료 및 기록
-    -   과거 검사 결과 및 학습 세션 기록 열람
-    -   ML 서버의 분석 결과 및 피드백 표시
-    -   Firebase를 통한 사용자 인증 및 데이터 관리 요청
-
--   **Firebase (데이터베이스)**: Google의 클라우드 기반 백엔드 서비스입니다.
-    -   **Authentication**: 사용자 계정 생성, 로그인, 자동 로그인 등 인증 처리
-    -   **Firestore**: 학습 성향 검사 결과, 학습 세션 기록 등 모든 애플리케이션 데이터 저장 및 실시간 동기화
-
--   **ML 서버 (백엔드)**: `Python`과 `Flask` 기반의 AI/머신러닝 서버입니다.
-    -   모바일 앱에서 전송된 학습 데이터를 분석
-    -   사용자 학습 패턴 기반 최적의 학습/휴식 시간 예측
-    -   학습 결과에 대한 맞춤형 AI 피드백 생성 및 제공
+'''
+개인 맞춤 학습 가이드 (Personal Study Guide)
+├── 모바일 앱 (클라이언트) - React Native / Expo
+│   ├── 사용자 인터페이스 (UI)
+│   │   ├── 학습 성향 검사 화면
+│   │   ├── 타이머 및 학습 세션 관리 화면
+│   │   ├── 기록 열람 화면 (검사 결과, 학습 세션)
+│   │   └── AI 분석 피드백 표시
+│   ├── 데이터 요청 및 전송
+│   │   ├── 사용자 인증 요청 (Firebase Authentication)
+│   │   ├── 데이터 저장/조회 요청 (Firestore Database)
+│   │   └── 학습 데이터 전송 (ML 서버)
+│   └── API 응답 처리
+│       ├── 인증 상태/데이터 응답 처리
+│       └── 분석 결과 및 피드백 수신 및 표시
+│
+├── Firebase (데이터베이스)
+│   ├── Firebase Authentication
+│   │   └── 사용자 인증 (회원가입, 로그인, 세션 관리)
+│   └── Firestore Database
+│       ├── 데이터 저장 (학습 성향 검사 결과, 학습 세션 기록)
+│       └── 데이터 조회 (기록 열람)
+│
+└── ML 서버 (백엔드) - Python / Flask
+    ├── 학습 데이터 수신
+    │   └── 모바일 앱으로부터 학습 데이터 수신
+    ├── 데이터 분석
+    │   ├── Scikit-learn 기반 학습 패턴 분석
+    │   ├── 최적 학습/휴식 시간 예측
+    │   └── 맞춤형 AI 피드백 생성
+    └── 결과 전송
+        └── 분석 결과 및 피드백 모바일 앱으로 전송
+'''
 
 ## 프로젝트 프로그램 설치방법
 
