@@ -61,7 +61,7 @@
 
 이 프로젝트는 사용자 중심의 학습 경험을 제공하기 위해 **모바일 앱(클라이언트)**, **Firebase(데이터베이스)**, 그리고 **ML 서버(백엔드)**의 세 가지 핵심 구성 요소로 이루어져 있습니다.
 
-<img src="여기에_이미지_경로_입력.png"/>
+<img width="383" alt="Image" src="https://github.com/user-attachments/assets/7481d06e-e5ff-4ff4-bd4d-71f693099dc4" />
 
 ## 프로젝트 프로그램 설치방법
 
