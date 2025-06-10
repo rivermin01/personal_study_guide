@@ -302,7 +302,7 @@ export default function TimerScreen() {
     if (finalStudySegments.length > 0 || finalBreakSegments.length > 0) {
       setShowScoreModal(true);
     } else {
-      Alert.alert('알림', '기록된 학습 활동이 없어 세션이 종료됩니다.');
+      Alert.alert('알림', '기록을 먼저 시작해주세요.');
       resetTimer(); // 활동이 없으면 타이머 리셋
     }
   }, [currentActiveStudySegment, currentActiveBreakSegment, sessionStudySegments, sessionBreakSegments, resetTimer]);

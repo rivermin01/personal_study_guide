@@ -45,7 +45,7 @@ export default function TimerRecordDetail({ route }: TimerRecordDetailProps) {
 
         <View style={styles.breakSection}>
           <Text style={styles.sectionTitle}>휴식 기록</Text>
-          {record.breaks.map((breakItem, index) => {
+          {record.breakSegments.map((breakItem, index) => {
             const breakDuration = Math.round(breakItem.duration / (1000 * 60));
             return (
               <View key={index} style={styles.breakItem}>

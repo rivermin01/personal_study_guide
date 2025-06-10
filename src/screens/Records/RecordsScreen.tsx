@@ -13,6 +13,7 @@ import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
 import { db, auth } from '../../config/firebase';
 import { TestRecord, TimerRecord, RecordType } from '../../types/records';
 import { formatDate } from '../../utils/date';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function RecordsScreen() {
   const navigation = useNavigation<any>();
@@ -103,64 +104,66 @@ export default function RecordsScreen() {
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.segmentContainer}>
-        <TouchableOpacity
-          style={[
-            styles.segmentButton,
-            selectedType === 'test' && styles.segmentButtonActive,
-          ]}
-          onPress={() => setSelectedType('test')}
-        >
-          <Text
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <View style={styles.segmentContainer}>
+          <TouchableOpacity
             style={[
-              styles.segmentButtonText,
-              selectedType === 'test' && styles.segmentButtonTextActive,
+              styles.segmentButton,
+              selectedType === 'test' && styles.segmentButtonActive,
             ]}
+            onPress={() => setSelectedType('test')}
           >
-            검사 기록
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[
-            styles.segmentButton,
-            selectedType === 'timer' && styles.segmentButtonActive,
-          ]}
-          onPress={() => setSelectedType('timer')}
-        >
-          <Text
+            <Text
+              style={[
+                styles.segmentButtonText,
+                selectedType === 'test' && styles.segmentButtonTextActive,
+              ]}
+            >
+              검사 기록
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
             style={[
-              styles.segmentButtonText,
-              selectedType === 'timer' && styles.segmentButtonTextActive,
+              styles.segmentButton,
+              selectedType === 'timer' && styles.segmentButtonActive,
             ]}
+            onPress={() => setSelectedType('timer')}
           >
-            타이머 기록
-          </Text>
-        </TouchableOpacity>
-      </View>
+            <Text
+              style={[
+                styles.segmentButtonText,
+                selectedType === 'timer' && styles.segmentButtonTextActive,
+              ]}
+            >
+              타이머 기록
+            </Text>
+          </TouchableOpacity>
+        </View>
 
-      {selectedType === 'test' ? (
-        <FlatList
-          data={testRecords}
-          renderItem={renderTestRecord}
-          keyExtractor={item => item.id}
-          contentContainerStyle={styles.listContainer}
-          ListEmptyComponent={
-            <Text style={styles.emptyText}>검사 기록이 없습니다.</Text>
-          }
-        />
-      ) : (
-        <FlatList
-          data={timerRecords}
-          renderItem={renderTimerRecord}
-          keyExtractor={item => item.id}
-          contentContainerStyle={styles.listContainer}
-          ListEmptyComponent={
-            <Text style={styles.emptyText}>타이머 기록이 없습니다.</Text>
-          }
-        />
-      )}
-    </View>
+        {selectedType === 'test' ? (
+          <FlatList
+            data={testRecords}
+            renderItem={renderTestRecord}
+            keyExtractor={item => item.id}
+            contentContainerStyle={styles.listContainer}
+            ListEmptyComponent={
+              <Text style={styles.emptyText}>검사 기록이 없습니다.</Text>
+            }
+          />
+        ) : (
+          <FlatList
+            data={timerRecords}
+            renderItem={renderTimerRecord}
+            keyExtractor={item => item.id}
+            contentContainerStyle={styles.listContainer}
+            ListEmptyComponent={
+              <Text style={styles.emptyText}>타이머 기록이 없습니다.</Text>
+            }
+          />
+        )}
+      </View>
+    </SafeAreaView>
   );
 }
 
@@ -238,5 +241,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#666',
     marginTop: 24,
+  },
+  safeArea: {
+    flex: 1,
+    backgroundColor: COLORS.background,
   },
 }); 
