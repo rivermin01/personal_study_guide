@@ -51,7 +51,6 @@
 2025.05.22 ~ 2025.06.10
 
 ## 개발 환경
-- **OS**: macOS Sonoma 14.5
 - **Node.js**: v18.x.x (Expo 요구사항)
 - **Python**: 3.x.x (Flask, Scikit-learn, NumPy)
 - **Expo CLI**: 53.x.x
