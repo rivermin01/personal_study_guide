@@ -67,19 +67,21 @@ export default function RecordsScreen() {
   const renderTestRecord = ({ item }: { item: TestRecord }) => (
     <TouchableOpacity
       style={styles.recordItem}
-      // onPress={() => navigation.navigate('기록', { screen: 'RecordDetail', params: { result: item } })}
     >
       <Text style={styles.recordTitle}>{item.personalityType}</Text>
+      {item.recommendation && (
+        <Text style={styles.recordRecommendation}>{item.recommendation}</Text>
+      )}
       <Text style={styles.recordDate}>{formatDate(item.timestamp)}</Text>
     </TouchableOpacity>
   );
 
   const renderTimerRecord = ({ item }: { item: TimerRecord }) => {
     const duration = Math.round(item.duration / 60); // 초 단위를 분 단위로 변환
+    const totalBreakDuration = Math.round(item.breakSegments.reduce((sum, seg) => sum + seg.duration, 0) / 60); // 총 휴식 시간 (분 단위)
     return (
       <TouchableOpacity
         style={styles.recordItem}
-        // onPress={() => navigation.navigate('기록', { screen: 'TimerRecordDetail', params: { record: item } })}
       >
         <Text style={styles.recordTitle}>
           {item.subject} ({duration}분)
@@ -88,7 +90,7 @@ export default function RecordsScreen() {
         <View style={styles.recordStats}>
           <Text style={styles.recordStat}>집중도: {item.focusScore}</Text>
           <Text style={styles.recordStat}>
-            휴식 횟수: {item.breakSegments.length}회
+            휴식 횟수: {item.breakSegments.length}회({totalBreakDuration}분)
           </Text>
         </View>
       </TouchableOpacity>
@@ -245,5 +247,10 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: COLORS.background,
+  },
+  recordRecommendation: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 4,
   },
 }); 

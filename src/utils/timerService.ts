@@ -170,10 +170,10 @@ export const getStudyAnalytics = async (): Promise<StudyAnalytics> => {
     return {
       bestTimeOfDay: timeAnalytics.bestTime,
       recommendedStudyDuration: mlPrediction.confidence > 0.7 
-        ? mlPrediction.predictedDuration 
+        ? Math.round(mlPrediction.predictedDuration / 60) 
         : timeAnalytics.recommendedDuration,
       recommendedBreakDuration: mlPrediction.confidence > 0.7
-        ? mlPrediction.predictedBreakTime
+        ? Math.round(mlPrediction.predictedBreakTime / 60)
         : calculateRecommendedBreak(sessions),
       productivityScore: calculateProductivityScore(sessions),
       focusScore: calculateAverageFocusScore(sessions),
@@ -232,7 +232,7 @@ const calculateRecommendedDuration = (sessions: StudySession[], timeOfDay: strin
     return sum + totalSessionDuration;
   }, 0) / productiveSessions.length;
 
-  return Math.round(avgDuration / 60); // 분 단위로 반올림
+  return Math.max(Math.round(avgDuration / 60), 25); // 분 단위로 반올림하고 최소 25분 보장
 };
 
 // 추천 휴식 시간 계산
@@ -247,7 +247,7 @@ const calculateRecommendedBreak = (sessions: StudySession[]) => {
     return sum + totalSessionBreakDuration;
   }, 0) / productiveSessions.length;
 
-  return Math.round(avgBreakDuration / 60); // 분 단위로 변환
+  return Math.max(Math.round(avgBreakDuration / 60), 5); // 분 단위로 변환하고 최소 5분 보장
 };
 
 // 기타 헬퍼 함수들

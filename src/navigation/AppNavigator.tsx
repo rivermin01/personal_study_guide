@@ -5,8 +5,6 @@ import { COLORS } from '../constants/colors';
 import HomeScreen from '../screens/Home/HomeScreen';
 import StartTestScreen from '../screens/Home/StartTestScreen';
 import RecordsScreen from '../screens/Records/RecordsScreen';
-// import RecordDetailScreen from '../screens/Records/RecordDetailScreen'; // 상세 화면 제거
-// import TimerRecordDetailScreen from '../screens/Records/TimerRecordDetailScreen'; // 상세 화면 제거
 import TimerScreen from '../screens/Timer/TimerScreen';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
@@ -24,8 +22,6 @@ const RecordsStack = () => {
       }}
     >
       <Stack.Screen name="기록" component={RecordsScreen} />
-      {/* <Stack.Screen name="RecordDetail" component={RecordDetailScreen} options={{ title: '검사 기록 상세' }} /> */}
-      {/* <Stack.Screen name="TimerRecordDetail" component={TimerRecordDetailScreen} options={{ title: '타이머 기록 상세' }} /> */}
     </Stack.Navigator>
   );
 };

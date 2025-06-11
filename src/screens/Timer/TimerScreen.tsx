@@ -22,35 +22,35 @@ const DEFAULT_SETTINGS: TimerSettings = {
 };
 
 export default function TimerScreen() {
-  // Main timer control states
-  const [isStudyRunning, setIsStudyRunning] = useState(false); // Is study stopwatch running?
-  const [isBreakRunning, setIsBreakRunning] = useState(false); // Is break stopwatch running?
-  const [currentStudySegmentTime, setCurrentStudySegmentTime] = useState(0); // Current active study segment time (for display)
-  const [currentBreakSegmentTime, setCurrentBreakSegmentTime] = useState(0); // Current active break segment time (for display)
-  const [elapsedStudyTime, setElapsedStudyTime] = useState(0); // Total accumulated study time for the session
-  const [elapsedBreakTime, setElapsedBreakTime] = useState(0); // Total accumulated break time for the session
-  const [studySegmentCount, setStudySegmentCount] = useState(0); // Number of study segments completed/started
-  const [breakSegmentCount, setBreakSegmentCount] = useState(0); // Number of break segments completed/started
+  // 메인 타이머 제어 상태
+  const [isStudyRunning, setIsStudyRunning] = useState(false); // 학습 스톱워치 실행 중인가?
+  const [isBreakRunning, setIsBreakRunning] = useState(false); // 휴식 스톱워치 실행 중인가?
+  const [currentStudySegmentTime, setCurrentStudySegmentTime] = useState(0); // 현재 활성 학습 세그먼트 시간 (표시용)
+  const [currentBreakSegmentTime, setCurrentBreakSegmentTime] = useState(0); // 현재 활성 휴식 세그먼트 시간 (표시용)
+  const [elapsedStudyTime, setElapsedStudyTime] = useState(0); // 세션에 누적된 총 학습 시간
+  const [elapsedBreakTime, setElapsedBreakTime] = useState(0); // 세션에 누적된 총 휴식 시간
+  const [studySegmentCount, setStudySegmentCount] = useState(0); // 완료/시작된 학습 세그먼트 수
+  const [breakSegmentCount, setBreakSegmentCount] = useState(0); // 완료/시작된 휴식 세그먼트 수
 
-  // New states for managing individual segments
+  // 개별 세그먼트 관리를 위한 새로운 상태
   const [sessionStudySegments, setSessionStudySegments] = useState<StudySegment[]>([]);
   const [sessionBreakSegments, setSessionBreakSegments] = useState<BreakSegment[]>([]);
   const [currentActiveStudySegment, setCurrentActiveStudySegment] = useState<StudySegment | null>(null);
   const [currentActiveBreakSegment, setCurrentActiveBreakSegment] = useState<BreakSegment | null>(null);
 
-  // Existing states, potentially re-evaluated
+  // 기존 상태 (재평가될 수 있음)
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [analytics, setAnalytics] = useState<StudyAnalytics | null>(null);
   const [sessionStartTime, setSessionStartTime] = useState<number | null>(null);
   const [showScoreModal, setShowScoreModal] = useState(false);
   const [score, setScore] = useState('70');
-  const [lastStudyDuration, setLastStudyDuration] = useState(0); // Used for feedback modal (this will be total elapsed study time)
+  const [lastStudyDuration, setLastStudyDuration] = useState(0); // 피드백 모달에 사용되는 총 경과 학습 시간
   const [predictedNextDuration, setPredictedNextDuration] = useState(0);
   const [predictedNextBreakTime, setPredictedNextBreakTime] = useState(0);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [aiFeedback, setAiFeedback] = useState<FeedbackResponse | null>(null);
 
-  // Helper to format time to hh:mm:ss
+  // 시간을 hh:mm:ss 형식으로 포맷팅하는 헬퍼 함수
   const formatTime = (seconds: number): string => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
@@ -58,9 +58,9 @@ export default function TimerScreen() {
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
-  // Timer interval effect
+  // 타이머 인터벌 효과
   useEffect(() => {
-    let interval: ReturnType<typeof setInterval> | null = null; 
+    let interval: ReturnType<typeof setInterval> | null = null;
 
     if (isStudyRunning) {
       interval = setInterval(() => {
@@ -87,19 +87,26 @@ export default function TimerScreen() {
       const data = await getStudyAnalytics();
       setAnalytics(data);
 
+      console.log('Analytics Data:', data);
+      console.log('Recommended Study Duration (minutes):', data.recommendedStudyDuration);
+      console.log('Recommended Break Duration (minutes):', data.recommendedBreakDuration);
+      console.log('ML Confidence:', data.mlConfidence);
+
       // ML 예측 결과로 타이머 기본값 및 예측 시간 업데이트
+      // predictedNextDuration과 predictedNextBreakTime은 초 단위로 저장되어야 합니다.
       if (data.mlConfidence > 0.3) {
-        setPredictedNextDuration(data.recommendedStudyDuration); 
-        setPredictedNextBreakTime(data.recommendedBreakDuration);
+        setPredictedNextDuration(data.recommendedStudyDuration * 60); 
+        setPredictedNextBreakTime(data.recommendedBreakDuration * 60);
       } else {
-        setPredictedNextDuration(25 * 60);
-        setPredictedNextBreakTime(5 * 60);
+        // ML 예측 신뢰도가 낮으면 기본값 사용 (초 단위로 변환하여 저장)
+        setPredictedNextDuration(DEFAULT_SETTINGS.studyDuration * 60);
+        setPredictedNextBreakTime(DEFAULT_SETTINGS.breakDuration * 60);
       }
     } catch (error) {
       console.error('Error loading analytics:', error);
       // 에러 발생 시 기본값으로 설정
-      setPredictedNextDuration(25 * 60);
-      setPredictedNextBreakTime(5 * 60);
+      setPredictedNextDuration(DEFAULT_SETTINGS.studyDuration * 60);
+      setPredictedNextBreakTime(DEFAULT_SETTINGS.breakDuration * 60);
     }
   }, []);
 
@@ -117,14 +124,15 @@ export default function TimerScreen() {
     setSessionStartTime(null);
     setScore('70');
     setLastStudyDuration(0); 
-    setPredictedNextDuration(0); 
-    setPredictedNextBreakTime(0); 
+    // resetTimer 호출 시 예측 시간은 초기화하지 않음 (새 세션 시작 시 다시 로드되므로)
+    // setPredictedNextDuration(0); 
+    // setPredictedNextBreakTime(0); 
     setShowFeedbackModal(false); 
     setAiFeedback(null);
-    setSessionStudySegments([]); // Reset segment arrays
-    setSessionBreakSegments([]); // Reset segment arrays
-    setCurrentActiveStudySegment(null); // Reset active segments
-    setCurrentActiveBreakSegment(null); // Reset active segments
+    setSessionStudySegments([]); // 세그먼트 배열 초기화
+    setSessionBreakSegments([]); // 세그먼트 배열 초기화
+    setCurrentActiveStudySegment(null); // 활성 세그먼트 초기화
+    setCurrentActiveBreakSegment(null); // 활성 세그먼트 초기화
     loadAnalytics(); // 분석 데이터 다시 로드
   }, [loadAnalytics]);
 
@@ -133,37 +141,37 @@ export default function TimerScreen() {
     const now = Date.now();
 
     if (isStudyRunning) {
-      setIsStudyRunning(false); // Pause study stopwatch
+      setIsStudyRunning(false); // 학습 스톱워치 일시정지
       if (currentActiveStudySegment) {
         const endedSegment = { ...currentActiveStudySegment, endTime: now, duration: (now - currentActiveStudySegment.startTime) / 1000 };
         setSessionStudySegments(prev => [...prev, endedSegment]);
-        setCurrentActiveStudySegment(null); // Clear active study segment
-        setCurrentStudySegmentTime(0); // Reset display for next study segment
+        setCurrentActiveStudySegment(null); // 활성 학습 세그먼트 지우기
+        setCurrentStudySegmentTime(0); // 다음 학습 세그먼트 표시를 위해 초기화
       }
 
-      // Start new break segment
+      // 새로운 휴식 세그먼트 시작
       const newBreakSegment: BreakSegment = {
         id: Math.random().toString(36).substr(2, 9),
         startTime: now,
-        endTime: 0, // Will be updated on pause/stop
-        duration: 0, // Will be updated on pause/stop
+        endTime: 0, // 일시정지/정지 시 업데이트될 예정
+        duration: 0, // 일시정지/정지 시 업데이트될 예정
         segmentNumber: breakSegmentCount + 1,
       };
       setCurrentActiveBreakSegment(newBreakSegment);
       setBreakSegmentCount(prev => prev + 1);
       setIsBreakRunning(true);
-      setCurrentBreakSegmentTime(0); // Start break timer from 0
+      setCurrentBreakSegmentTime(0); // 휴식 타이머 0부터 시작
 
     } else if (isBreakRunning) {
-      setIsBreakRunning(false); // Pause break stopwatch
+      setIsBreakRunning(false); // 휴식 스톱워치 일시정지
       if (currentActiveBreakSegment) {
         const endedSegment = { ...currentActiveBreakSegment, endTime: now, duration: (now - currentActiveBreakSegment.startTime) / 1000 };
         setSessionBreakSegments(prev => [...prev, endedSegment]);
-        setCurrentActiveBreakSegment(null); // Clear active break segment
-        setCurrentBreakSegmentTime(0); // Reset display for next break segment
+        setCurrentActiveBreakSegment(null); // 활성 휴식 세그먼트 지우기
+        setCurrentBreakSegmentTime(0); // 다음 휴식 세그먼트 표시를 위해 초기화
       }
 
-      // Start new study segment
+      // 새로운 학습 세그먼트 시작
       const newStudySegment: StudySegment = {
         id: Math.random().toString(36).substr(2, 9),
         startTime: now,
@@ -174,7 +182,7 @@ export default function TimerScreen() {
       setCurrentActiveStudySegment(newStudySegment);
       setStudySegmentCount(prev => prev + 1);
       setIsStudyRunning(true);
-      setCurrentStudySegmentTime(0); // Start study timer from 0
+      setCurrentStudySegmentTime(0); // 학습 타이머 0부터 시작
 
     } else { // 현재 아무것도 실행 중이 아님 (초기 시작 또는 완전히 정지된 상태에서 재개)
       if (studySegmentCount === 0 && breakSegmentCount === 0) { // 완전 처음 시작
@@ -208,27 +216,27 @@ export default function TimerScreen() {
         setIsStudyRunning(true);
         setCurrentStudySegmentTime(0);
 
-      } else { // Resume from a paused state (either study or break was active before total stop)
-        // This case should not be reached if it's always switching or stopping fully.
-        // The user's request implies only switching or initial start.
-        // If this branch is hit, it means a full stop happened and then resume.
-        // The previous segments should have been finalized in endTimer.
-        // So, this is effectively starting a brand new segment.
-        // We need to determine if we are resuming study or break.
-        // Based on the prompt, it seems "다시 시작 버튼을 누르면 휴식 시간은 멈춰두고 아까 일시 정지 시켰던 공부 시간을 다시 시작하면서 보여주고"
-        // implies the "play" button will toggle between study and break.
-        // The current handleStartPauseResume logic handles this toggle.
-        // If it's *not* running, and segment counts > 0, it should be resuming the *last* type of activity.
-        // This logic handles a "total pause" and then "resume study".
-        if (sessionStudySegments.length > 0 && !isBreakRunning) { // If there were study segments, assume we resume study
+      } else { // 일시정지 상태에서 재개 (학습 또는 휴식이 전체 정지 전에 활성 상태였음)
+        // 이 경우는 항상 전환되거나 완전히 정지되는 경우에 도달해서는 안 됩니다.
+        // 사용자 요청은 전환 또는 초기 시작만을 의미합니다.
+        // 만약 이 분기가 실행되면, 전체 정지가 발생한 후 재개가 일어났다는 의미입니다.
+        // 이전 세그먼트는 endTimer에서 최종 처리되었어야 합니다.
+        // 따라서 이것은 사실상 새로운 세그먼트를 시작하는 것과 같습니다.
+        // 학습을 재개할지 휴식을 재개할지 결정해야 합니다.
+        // 프롬프트에 따르면 "다시 시작 버튼을 누르면 휴식 시간은 멈춰두고 아까 일시 정지 시켰던 공부 시간을 다시 시작하면서 보여주고"
+        // 이는 "재생" 버튼이 학습과 휴식 사이를 전환한다는 것을 의미합니다.
+        // 현재 handleStartPauseResume 로직이 이 전환을 처리합니다.
+        // 만약 실행 중이 아니고, 세그먼트 수가 0보다 크다면, 마지막 활동 유형을 재개해야 합니다.
+        // 이 로직은 "전체 일시정지" 후 "학습 재개"를 처리합니다.
+        if (sessionStudySegments.length > 0 && !isBreakRunning) { // 학습 세그먼트가 있고 휴식 중이 아니면 학습 재개로 가정
           const lastStudySeg = sessionStudySegments[sessionStudySegments.length - 1];
-          // Check if the last segment was actually paused (endTime === 0) or fully ended
-          if (lastStudySeg && lastStudySeg.endTime === 0) { // If last study segment was not ended (i.e. paused)
-            // Update its startTime to `now` to account for the pause duration
+          // 마지막 세그먼트가 실제로 일시정지되었는지 (endTime === 0) 또는 완전히 종료되었는지 확인
+          if (lastStudySeg && lastStudySeg.endTime === 0) { // 마지막 학습 세그먼트가 종료되지 않았다면 (즉, 일시정지됨)
+            // 일시정지 기간을 고려하여 startTime을 `now`로 업데이트
             const resumedSegment = { ...lastStudySeg, startTime: now };
-            setCurrentActiveStudySegment(resumedSegment); // Re-activate it to continue counting
+            setCurrentActiveStudySegment(resumedSegment); // 계속 카운트하기 위해 다시 활성화
             setIsStudyRunning(true);
-          } else { // All study segments ended, start a new one
+          } else { // 모든 학습 세그먼트가 종료되었으므로 새로운 세그먼트 시작
             const newStudySegment: StudySegment = {
               id: Math.random().toString(36).substr(2, 9),
               startTime: now,
@@ -241,15 +249,15 @@ export default function TimerScreen() {
             setIsStudyRunning(true);
             setCurrentStudySegmentTime(0);
           }
-        } else if (sessionBreakSegments.length > 0 && !isStudyRunning) { // If there were break segments, assume we resume break
+        } else if (sessionBreakSegments.length > 0 && !isStudyRunning) { // 휴식 세그먼트가 있고 학습 중이 아니면 휴식 재개로 가정
           const lastBreakSeg = sessionBreakSegments[sessionBreakSegments.length - 1];
-          // Check if the last segment was actually paused (endTime === 0) or fully ended
-          if (lastBreakSeg && lastBreakSeg.endTime === 0) { // If last break segment was not ended (i.e. paused)
-            // Update its startTime to `now` to account for the pause duration
+          // 마지막 세그먼트가 실제로 일시정지되었는지 (endTime === 0) 또는 완전히 종료되었는지 확인
+          if (lastBreakSeg && lastBreakSeg.endTime === 0) { // 마지막 휴식 세그먼트가 종료되지 않았다면 (즉, 일시정지됨)
+            // 일시정지 기간을 고려하여 startTime을 `now`로 업데이트
             const resumedSegment = { ...lastBreakSeg, startTime: now };
-            setCurrentActiveBreakSegment(resumedSegment); // Re-activate it to continue counting
+            setCurrentActiveBreakSegment(resumedSegment); // 계속 카운트하기 위해 다시 활성화
             setIsBreakRunning(true);
-          } else { // All break segments ended, start a new one
+          } else { // 모든 휴식 세그먼트가 종료되었으므로 새로운 세그먼트 시작
             const newBreakSegment: BreakSegment = {
               id: Math.random().toString(36).substr(2, 9),
               startTime: now,
@@ -262,9 +270,9 @@ export default function TimerScreen() {
             setIsBreakRunning(true);
             setCurrentBreakSegmentTime(0);
           }
-        } else { // Truly initial state or error
+        } else { // 정말 초기 상태 또는 오류
           Alert.alert('알림', '세션을 시작합니다.');
-          resetTimer(); // Effectively starts a new session if in an unexpected state
+          resetTimer(); // 예상치 못한 상태일 경우 새 세션을 효과적으로 시작
         }
       }
     }
@@ -360,8 +368,8 @@ export default function TimerScreen() {
             });
         }
         
-        // setScore('70'); // 점수 초기화는 모달 닫을 때 resetTimer에서 처리
-        // resetTimer(); // AI 분석 모달이 닫힐 때 호출되도록 여기서는 제거
+        // 점수 초기화는 모달 닫을 때 resetTimer에서 처리
+        // AI 분석 모달이 닫힐 때 호출되도록 여기서는 제거
 
       } catch (error) {
         console.error('Error saving session or general prediction:', error);
@@ -558,7 +566,7 @@ export default function TimerScreen() {
           <View style={styles.analyticsItem}>
             <Text style={styles.analyticsLabel}>추천 학습 시간</Text>
             <Text style={styles.analyticsValue}>
-              {Math.round(analytics.recommendedStudyDuration / 60)}분
+              {Math.round(analytics.recommendedStudyDuration)}분
             </Text>
           </View>
 

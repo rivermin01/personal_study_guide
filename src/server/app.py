@@ -188,6 +188,43 @@ def predict():
             'message': f'오류가 발생했습니다: {str(e)}'
         }), 500
 
+@app.route('/save-session', methods=['POST'])
+def save_session():
+    try:
+        data = request.get_json()
+        required_fields = ['duration', 'breakTime', 'score']
+        
+        # 필수 필드 확인
+        for field in required_fields:
+            if field not in data:
+                return jsonify({
+                    'error': f'필수 필드가 누락되었습니다: {field}'
+                }), 400
+        
+        # 점수 범위 확인
+        if not (1 <= data['score'] <= 100):
+            return jsonify({
+                'error': '점수는 1에서 100 사이여야 합니다.'
+            }), 400
+            
+        # 현재 시간 정보 추가
+        now = datetime.now()
+        data['hour'] = now.hour
+        data['dayOfWeek'] = now.weekday()
+        
+        # 여기에 데이터 저장 로직 추가
+        # (실제 구현에서는 데이터베이스에 저장)
+        
+        return jsonify({
+            'message': '학습 세션이 성공적으로 저장되었습니다.',
+            'session': data
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'error': f'오류가 발생했습니다: {str(e)}'
+        }), 500
+
 @app.route('/feedback', methods=['POST'])
 def get_feedback():
     try:
