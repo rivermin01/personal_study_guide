@@ -1,5 +1,8 @@
 # 개인 맞춤 학습 가이드 (Personal Study Guide)
 
+## 프레젠테이션
+https://docs.google.com/presentation/d/1-v4TSBe-17-E-EUl3VJRe3FrYnQhPE8sjguSffHHh50/edit?usp=sharing
+
 ## 프로젝트 소개
 개인 맞춤 학습 가이드는 사용자의 학습 성향을 분석하고, 학습 세션을 관리하여 최적화된 학습 방법을 제안하는 모바일 애플리케이션입니다. 성격 유형 검사를 통해 사용자의 학습 스타일을 파악하고, 이에 맞는 맞춤형 학습 전략을 제공하며, 실제 학습 데이터를 기반으로 개인화된 피드백을 제공합니다.
 
