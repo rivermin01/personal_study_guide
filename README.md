@@ -161,7 +161,8 @@ npm start
 - 설정 화면
 <img width="499" alt="Image" src="https://github.com/user-attachments/assets/b997e2bc-6cf2-496a-8463-5a9efb68ef8f" />
 
-
+## 🌄 시연 영상
+[https://drive.google.com/file/d/1PoRS9EhUHkJRxhARcvf3LhNlSBmjyp4l/view?usp=sharing](url)
 
 
 
