@@ -112,4 +112,58 @@ npm start
 - **학습 성향 검사**: '검사' 탭에서 성향 검사를 진행하고 결과를 확인합니다.
 - **학습 세션 관리**: '타이머' 탭에서 공부/휴식 타이머를 시작하고 종료하여 학습 세션을 기록합니다.
 - **기록 확인**: '기록' 탭에서 과거의 검사 결과 및 학습 세션 기록을 열람합니다.
-- **로그아웃**: 로그인된 상태에서 언제든지 로그아웃할 수 있습니다. 
+- **로그아웃**: 로그인된 상태에서 언제든지 로그아웃할 수 있습니다.
+
+## 앱 UI
+
+
+### 로그인 탭
+- 로그인 화면
+<img width="492" alt="Image" src="https://github.com/user-attachments/assets/3ab7c3c4-3c99-43bb-bc22-702e8f593cdc" />
+
+- 회원가입 화면
+<img width="499" alt="Image" src="https://github.com/user-attachments/assets/d75599a9-8559-45a8-9019-a8c94f9ae353" />
+
+### 홈 탭
+- 기본 홈 화면
+<img width="498" alt="Image" src="https://github.com/user-attachments/assets/2aca3373-f8da-4d00-92b4-e50eefd6818a" />
+
+- 검사 중 화면
+<img width="496" alt="Image" src="https://github.com/user-attachments/assets/f8ff8a2c-98bf-407d-ac21-3c809f78975a" />
+
+- 검사 결과 화면
+<img width="492" alt="Image" src="https://github.com/user-attachments/assets/3df37144-77e6-443e-94cb-5342f9e7c81e" />
+
+### 타이머 탭
+- 타이머 화면
+<img width="496" alt="Image" src="https://github.com/user-attachments/assets/b125450f-7920-425a-91c7-e66b1eae2379" />
+
+- 타이머 시작시 (공부중)
+<img width="497" alt="Image" src="https://github.com/user-attachments/assets/a4446b79-61db-4128-8df9-59f85d93ac3d" />
+
+- 타이머 일시 정지시 (휴식중)
+<img width="500" alt="Image" src="https://github.com/user-attachments/assets/fcfe3799-3dc3-4a44-900c-6fa41dc120d1" />
+
+- 타이머 종료시 (이번 공부 세션 평가)
+<img width="497" alt="Image" src="https://github.com/user-attachments/assets/996337f8-fbab-4840-bc51-81055fb0d012" />
+
+- 공부 결과 화면
+<img width="498" alt="Image" src="https://github.com/user-attachments/assets/6c798935-3665-4067-baa3-15dc82f3e04a" />
+
+### 기록 탭
+- 검사 기록 화면
+<img width="500" alt="Image" src="https://github.com/user-attachments/assets/f3402ee0-10f2-4249-8597-01be7a1ce6a4" />
+
+- 타이머 기록 화면
+<img width="497" alt="Image" src="https://github.com/user-attachments/assets/74fc7df6-4bfb-4c68-a169-811a7d4fcbaa" />
+
+### 설정 탭
+- 설정 화면
+<img width="499" alt="Image" src="https://github.com/user-attachments/assets/b997e2bc-6cf2-496a-8463-5a9efb68ef8f" />
+
+
+
+
+
+
+
